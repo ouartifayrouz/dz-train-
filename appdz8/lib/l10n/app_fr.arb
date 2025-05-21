@@ -5,7 +5,10 @@
 
   "app_name": "Notre application",
   "checkSpamMessage": "📧 Si vous n'avez rien reçu, veuillez vérifier vos spams.",
-
+  "noMessages": "Aucun message",
+  "@noMessages": {
+    "description": "Texte affiché lorsqu'il n'y a pas de messages"
+  }
   "signin_title": "Connexion",
   "passwordMismatch": "Les mots de passe ne correspondent pas",
   "signin_subtitle": "Bienvenue ! Veuillez vous connecter pour continuer.",
