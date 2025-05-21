@@ -1,7 +1,10 @@
 
 {
   "@@locale": "en",
-
+ "noMessages": "No messages",
+  "@noMessages": {
+    "description": "Text displayed when there are no messages"
+  }
   "app_name": "Our App",
   "checkSpamMessage": "📧 If you didn't receive anything, please check your spam folder.",
   "change_password_page_title": "Change Password",
