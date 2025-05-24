@@ -18,7 +18,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final TextEditingController codeController = TextEditingController();
   bool isLoading = false;
 
-  String fullMessage = "";
+  String fullMessage = "📧 Si vous n'avez rien reçu, veuillez vérifier vos spams.";
   String displayedMessage = "";
   int _charIndex = 0;
   Timer? _typingTimer;
@@ -26,17 +26,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   void initState() {
     super.initState();
-    // On attend que le widget soit monté avant d'accéder à context
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        fullMessage = AppLocalizations.of(context)!.checkSpamMessage;
-      });
-      startTypingEffect();
-    });
+    startTypingEffect();
   }
 
   void startTypingEffect() {
-    _typingTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _typingTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       if (_charIndex < fullMessage.length) {
         setState(() {
           displayedMessage += fullMessage[_charIndex];
@@ -109,7 +103,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           local.verificationTitle,
           style: const TextStyle(fontSize: 24, color: Colors.black87),
         ),
-        backgroundColor: const Color(0xFF5677A3),
+        backgroundColor: const Color(0x998BB1FF),
         elevation: 0,
       ),
       body: Container(
@@ -120,9 +114,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFA3BED8),
-              Color(0xFFD1D9E6),
-              Color(0xFFF0F4F8),
+              Color(0xFFA3BED8), // bleu-gris moyen clair
+              Color(0xFFD1D9E6), // gris bleu clair
+              Color(0xFFF0F4F8), // blanc cassé très clair
             ],
           ),
         ),
@@ -154,7 +148,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF425B78),
+                  color: Color(0xFF3F51B5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -194,12 +188,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5677A3),
+                  backgroundColor: const Color(0x998BB1FF),
                   foregroundColor: Colors.black87,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 40, vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 5,
                 ),
