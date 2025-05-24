@@ -26,6 +26,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   @override
+
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
@@ -82,7 +83,8 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 24),
             _buildSettingsSection(localizations.preferences, [
               _buildTile(Icons.language, localizations.changeLanguage,
-                  subtitle: widget.selectedLanguage.toUpperCase(), onTap: () {
+                  subtitle: getLocalizedLanguageLabel(widget.selectedLanguage, localizations),
+                  onTap: () {
                     _showLanguageDialog(context);
                   }),
 
@@ -102,6 +104,18 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+  String getLocalizedLanguageLabel(String code, AppLocalizations loc) {
+    switch (code) {
+      case 'fr':
+        return loc.french;
+      case 'en':
+        return loc.english;
+      case 'ar':
+        return loc.arabic;
+      default:
+        return code.toUpperCase();
+    }
   }
 
   void _showLanguageDialog(BuildContext context) {
@@ -193,4 +207,5 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     );
   }
+
 }
