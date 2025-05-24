@@ -1,7 +1,10 @@
+import 'dart:async'; // Pour Timer
+import 'package:badges/badges.dart' as external_badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../main.dart';
 import 'user_info_page.dart';
 import 'settings_page.dart';
@@ -9,6 +12,7 @@ import 'support_page.dart';
 import 'HoraireTrainPage.dart';
 import 'logout_helper.dart';
 import 'historique_trajets_page.dart';
+import 'notifications_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String username;
@@ -32,6 +36,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Map<String, String>? userData;
   String _language = 'fr';
   bool _isDark = false;
+  int _unreadNotifications = 0; // notifications non lues
+  Timer? _notificationTimer;
 
   final Color primaryColor = const Color(0xFF1E1E1E);
 
@@ -41,13 +47,23 @@ class _ProfilePageState extends State<ProfilePage> {
     Color(0xFFA3BED8),
   ];
 
-
-
   @override
   void initState() {
     super.initState();
     fetchUserData();
     loadThemePreference();
+    fetchUnreadNotificationsCount();
+
+    // Refresh notifications count every 10 seconds
+    _notificationTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      fetchUnreadNotificationsCount();
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationTimer?.cancel();
+    super.dispose();
   }
 
   void loadThemePreference() async {
@@ -84,6 +100,23 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void fetchUnreadNotificationsCount() async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('notifications')
+          .doc(widget.username)
+          .collection('user_notifications')
+          .where('isRead', isEqualTo: false)
+          .get();
+
+      setState(() {
+        _unreadNotifications = snapshot.docs.length;
+      });
+    } catch (e) {
+      print('Erreur chargement notifications non lues : $e');
+    }
+  }
+
   void changeLanguage(String language) {
     setState(() {
       _language = language;
@@ -98,6 +131,8 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _isDark = isDark;
     });
+
+    widget.toggleTheme(isDark);
 
     Navigator.pushReplacement(
       context,
@@ -126,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: gradientColors,
-              begin: Alignment.topCenter, // ← Verticale
+              begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
@@ -192,7 +227,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 });
                 toggleTheme(value);
               },
-              secondary: Icon(Icons.dark_mode, color: isDark ? Colors.white : Colors.black),
+              secondary:
+                  Icon(Icons.dark_mode, color: isDark ? Colors.white : Colors.black),
             ),
             _buildListTile(Icons.settings, local.settings, () {
               if (userData != null && userData!['username'] != null) {
@@ -211,16 +247,32 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               }
             }, isDark),
-            _buildListTile(Icons.notifications, local.notifications, () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(local.notificationsComingSoon)),
-              );
-            }, isDark),
+            // Notifications avec badge
+            ListTile(
+              leading: external_badges.Badge(
+                showBadge: _unreadNotifications > 0,
+                badgeContent: Text(
+                  _unreadNotifications.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                ),
+                child: Icon(Icons.notifications,
+                    color: isDark ? Colors.white : Colors.black),
+              ),
+              title: Text(local.notifications,
+                  style:
+                      TextStyle(color: isDark ? Colors.white : Colors.black)),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationsPage()),
+                );
+              },
+            ),
             _buildListTile(Icons.history, local.favoriteTrips, () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const HistoriqueTrajetsPage()),
+                MaterialPageRoute(builder: (context) => const HistoriqueTrajetsPage()),
               );
             }, isDark),
             _buildListTile(Icons.train, local.trainSchedules, () {
@@ -240,11 +292,9 @@ class _ProfilePageState extends State<ProfilePage> {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(
-                    local.logout,
-                    style:
-                    TextStyle(color: isDark ? Colors.white : Colors.black),
-                  ),
+                  title: Text(local.logout,
+                      style:
+                          TextStyle(color: isDark ? Colors.white : Colors.black)),
                   content: Text(local.logoutConfirmation),
                   actions: [
                     TextButton(
@@ -280,10 +330,8 @@ class _ProfilePageState extends State<ProfilePage> {
           color: isDark ? Colors.white : Colors.black,
         ),
       ),
-      trailing: Icon(Icons.arrow_forward_ios,
-          color: isDark ? Colors.white54 : Colors.grey),
+      trailing: const Icon(Icons.arrow_forward_ios),
       onTap: onTap,
     );
   }
-
 }
