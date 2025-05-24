@@ -1,14 +1,8 @@
-
-
 {
   "@@locale": "fr",
 
   "app_name": "Notre application",
-  "checkSpamMessage": "📧 Si vous n'avez rien reçu, veuillez vérifier vos spams.",
-  "noMessages": "Aucun message",
-  "@noMessages": {
-    "description": "Texte affiché lorsqu'il n'y a pas de messages"
-  }
+
   "signin_title": "Connexion",
   "passwordMismatch": "Les mots de passe ne correspondent pas",
   "signin_subtitle": "Bienvenue ! Veuillez vous connecter pour continuer.",
@@ -37,8 +31,8 @@
     "description": "Message d'erreur générique avec insertion de l'erreur",
     "placeholders": {
       "error": {
-        "type": "Object"
-      }
+            "type": "Object"
+          }
     }
   },
 
@@ -52,7 +46,7 @@
     "description": "Affiche la distance entre les gares en mètres",
     "placeholders": {
       "distance": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -296,10 +290,10 @@
     "description": "Affiche la distance entre une station et l'utilisateur",
     "placeholders": {
       "station": {
-        "type": "Object"
+       "type": "Object"
       },
       "distance": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -308,7 +302,7 @@
     "description": "Liste les 3 gares les plus proches avec leurs distances",
     "placeholders": {
       "stations": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -339,7 +333,7 @@
   "intermediateStationsDetected": "✅ Gares intermédiaires détectées",
 
 
-  "createPasswordTitle": "Créer un nouveau mot de passe",
+"createPasswordTitle": "Créer un nouveau mot de passe",
   "newPassword": "Nouveau mot de passe",
 
   "invalidPassword": "🔒 Entrez un mot de passe valide (min. 6 caractères).",
@@ -557,7 +551,7 @@
     "description": "Message affiché lors de la mise à jour de la route avec le nombre de points",
     "placeholders": {
       "count": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -566,7 +560,7 @@
     "description": "Message indiquant si les deux gares sont sur la même ligne",
     "placeholders": {
       "result": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -591,7 +585,7 @@
   "gareNonTrouvee": "Gare non trouvée",
 
 
-  "toFavorise": "Favoriser",
+"toFavorise": "Favoriser",
   "routeWithId": "Trajet : {id}",
   "lostObjectForm_objectName": "Nom de l'objet",
   "lostObjectForm_description": "Description",
@@ -609,10 +603,10 @@
     "description": "Message affichant la gare de départ et les lignes associées",
     "placeholders": {
       "station": {
-        "type": "Object"
+       "type": "Object"
       },
       "lines": {
-        "type": "Object"
+       "type": "Object"
       }
     }
   },
@@ -620,17 +614,26 @@
   "jourDeCirculationLabel": "Jour de Circulation:",
   "nonSpecifieLabel": "Non spécifié",
   "prixLabel": "Prix:",
-  "destinationMessage": "🚆 Destination : {station} ({lines})",
-  "@destinationMessage": {
-    "description": "Message affichant la gare de destination et les lignes associées",
-    "placeholders": {
-      "station": {
-        "type": "Object"
-      },
-      "lines": {
-        "type": "Object"
-      }
-    }
-  }
+   "destinationMessage": "🚆 Destination : {station} ({lines})",
+   "@destinationMessage": {
+     "description": "Message affichant la gare de destination et les lignes associées",
+     "placeholders": {
+       "station": {
+         "type": "Object"
+       },
+       "lines": {
+         "type": "Object"
+       }
+     }
+   },
+   "checkSpamMessage": "📨 Si vous ne voyez pas l'e-mail, vérifiez votre dossier de spam ou demandez un nouveau code.",
+   "@checkSpamMessage": {
+     "description": "Message affiché sous forme de texte tapé progressivement pour indiquer à l'utilisateur de vérifier son spam"
+   },
+
+   "french": "Français",
+   "english": "Anglais",
+   "arabic": "Arabe",
+   "chooseLanguage": "Choisir la langue"
 
 }
