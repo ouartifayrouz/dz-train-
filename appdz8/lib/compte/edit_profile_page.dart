@@ -20,7 +20,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController usernameController;
   late TextEditingController emailController;
   late TextEditingController emploiController;
-  String selectedSexe = "Homme";
+  late String selectedSexe;
+
+  final List<String> sexeOptions = ["Homme", "Femme"];
 
   @override
   void initState() {
@@ -30,7 +32,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     usernameController = TextEditingController(text: widget.userData['username'] ?? '');
     emailController = TextEditingController(text: widget.userData['email'] ?? '');
     emploiController = TextEditingController(text: widget.userData['emploi'] ?? '');
-    selectedSexe = widget.userData['sexe'] ?? 'Homme';
+
+    // Vérification si selectedSexe est valide
+    String? userSexe = widget.userData['sexe'];
+    if (sexeOptions.contains(userSexe)) {
+      selectedSexe = userSexe!;
+    } else {
+      selectedSexe = "Homme"; // valeur par défaut
+    }
   }
 
   Future<void> saveChanges() async {
@@ -124,7 +133,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: DropdownButtonFormField<String>(
-                  value: selectedSexe,
+                  value: sexeOptions.contains(selectedSexe) ? selectedSexe : sexeOptions.first,
                   dropdownColor: isDark ? Colors.grey[900] : Colors.white,
                   style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
@@ -143,7 +152,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     DropdownMenuItem(value: "Femme", child: Text(loc.female)),
                   ],
                   onChanged: (value) {
-                    setState(() => selectedSexe = value!);
+                    if (value != null) {
+                      setState(() => selectedSexe = value);
+                    }
                   },
                 ),
               ),
