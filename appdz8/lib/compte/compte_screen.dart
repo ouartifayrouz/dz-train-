@@ -41,7 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
     Color(0xFFA3BED8),
   ];
 
-  final Color iconColor = Colors.black;
+
 
   @override
   void initState() {
@@ -192,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 });
                 toggleTheme(value);
               },
-              secondary: Icon(Icons.dark_mode, color: iconColor),
+              secondary: Icon(Icons.dark_mode, color: isDark ? Colors.white : Colors.black),
             ),
             _buildListTile(Icons.settings, local.settings, () {
               if (userData != null && userData!['username'] != null) {
@@ -271,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildListTile(
       IconData icon, String title, VoidCallback onTap, bool isDark) {
     return ListTile(
-      leading: Icon(icon, color: iconColor),
+      leading: Icon(icon, color: isDark ? Colors.white : Colors.black),
       title: Text(
         title,
         style: TextStyle(
@@ -280,9 +280,10 @@ class _ProfilePageState extends State<ProfilePage> {
           color: isDark ? Colors.white : Colors.black,
         ),
       ),
-      trailing:
-      Icon(Icons.arrow_forward_ios, color: isDark ? Colors.white54 : Colors.grey),
+      trailing: Icon(Icons.arrow_forward_ios,
+          color: isDark ? Colors.white54 : Colors.grey),
       onTap: onTap,
     );
   }
+
 }
