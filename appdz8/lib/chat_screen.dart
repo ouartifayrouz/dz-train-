@@ -18,9 +18,9 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isAscending = true;
 
   final List<Color> gradientColors = [
-    Color(0xFFA4C6A8),
-    Color(0xFFF4D9DE),
-    Color(0xFFDDD7E8),
+    Color(0xFFA3BED8),
+    Color(0xFFD1D9E6),
+    Color(0xFFF0F4F8),
   ];
 
   @override
@@ -30,62 +30,50 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
+        preferredSize: Size.fromHeight(0), // 🔽 Aucune barre visible
         child: AppBar(
-          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
           elevation: 0,
-          backgroundColor: Colors.transparent, // pour voir le dégradé
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFF0F4F8),
-                  Color(0xFFD1D9E6) ,
-                  Color(0xFFA3BED8),
-                ],
-              ),
-            ),
-          ),
-          title: Text(
-            loc.discussionsDesLignes,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(
-                _isAscending ? Icons.arrow_downward : Icons.arrow_upward,
-                color: isDark ? Colors.white70 : Color(0x8C000000),
-              ),
-              onPressed: () {
-                setState(() {
-                  _isAscending = !_isAscending;
-                });
-              },
-            )
-          ],
+          toolbarHeight: 0, // Cache totalement l'AppBar
         ),
       ),
+
 
       backgroundColor: isDark ? Colors.black : Color(0xCBE9EBF3),
       body: Column(
         children: [
-          Container(
-            color: isDark ? Colors.grey[900] : Color(0xCBE9EBF3),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                _buildTopButton(loc.salons, 0, isDark),
-                _buildTopButton(loc.assistant, 1, isDark),
-                _buildTopButton(loc.objetsPerdus, 2, isDark),
-              ],
-            ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildTopButton(loc.salons, 0, isDark),
+              _buildTopButton(loc.assistant, 1, isDark),
+              _buildTopButton(loc.objetsPerdus, 2, isDark),
+            ],
           ),
+          if (_selectedIndex == 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 12, top: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isAscending ? Icons.arrow_downward : Icons.arrow_upward,
+                      size: 20, // 🔽 petit bouton discret
+                      color: isDark ? Colors.white70 : const Color(0x8C000000),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isAscending = !_isAscending;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 8),
           Expanded(
             child: _selectedIndex == 0
                 ? _buildChatList(isDark, loc)
@@ -110,9 +98,9 @@ class _ChatScreenState extends State<ChatScreen> {
             });
           },
           style: OutlinedButton.styleFrom(
-            backgroundColor: isSelected ? Color(0xFF7986CB) :
-            Theme.of(context).cardColor,
-
+            backgroundColor: isSelected
+                ? Color(0xFF7986CB)
+                : Theme.of(context).cardColor,
             foregroundColor: isSelected
                 ? Colors.white
                 : isDark
@@ -124,7 +112,8 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             padding: EdgeInsets.symmetric(vertical: 12),
           ),
-          child: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text(label,
+              style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
     );
@@ -132,7 +121,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildChatList(bool isDark, AppLocalizations loc) {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('chats').snapshots(),
+      stream:
+      FirebaseFirestore.instance.collection('chats').snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -155,7 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
             var chat = chats[index];
             String chatId = chat.id;
 
-            // Traduction manuelle sans map
             String ligne;
             switch (chatId) {
               case "chat_ligne1":
@@ -180,7 +169,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   .orderBy("timestamp", descending: true)
                   .limit(1)
                   .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> messageSnapshot) {
+              builder: (context,
+                  AsyncSnapshot<QuerySnapshot> messageSnapshot) {
                 if (!messageSnapshot.hasData ||
                     messageSnapshot.data!.docs.isEmpty) {
                   return _buildChatCard(
@@ -188,10 +178,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 var lastMessage = messageSnapshot.data!.docs.first;
-                String message = lastMessage["text"] ?? loc.aucunMessage;
+                String message =
+                    lastMessage["text"] ?? loc.aucunMessage;
                 String time = lastMessage["timestamp"] != null
-                    ? DateFormat('HH:mm')
-                    .format(lastMessage["timestamp"].toDate())
+                    ? DateFormat('HH:mm').format(
+                    lastMessage["timestamp"].toDate())
                     : "--:--";
 
                 return _buildChatCard(
@@ -208,13 +199,16 @@ class _ChatScreenState extends State<ChatScreen> {
       String chatId, int index, bool isDark) {
     Color cardColor = isDark
         ? Colors.grey[850]!
-        : (index % 2 == 0 ? Color(0xFFE8ECEAFF) : Color(0xFFDDD7E8FF));
+        : (index % 2 == 0
+        ? Color(0xFFE8ECEAFF)
+        : Color(0xFFDDD7E8FF));
 
     return Card(
       color: cardColor,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(50),
@@ -235,15 +229,18 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         subtitle: Text(
           message,
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+          style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black87),
         ),
         trailing: Text(
           time,
-          style: TextStyle(color: isDark ? Colors.white60 : Colors.grey[600]),
+          style: TextStyle(
+              color: isDark ? Colors.white60 : Colors.grey[600]),
         ),
         onTap: () async {
           final prefs = await SharedPreferences.getInstance();
-          final username = prefs.getString('username') ?? 'Inconnu';
+          final username =
+              prefs.getString('username') ?? 'Inconnu';
 
           Navigator.push(
             context,
@@ -264,7 +261,8 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Text(
         loc.aucuneDiscussionDisponible,
         style: TextStyle(
-            fontSize: 16, color: isDark ? Colors.white54 : Colors.black54),
+            fontSize: 16,
+            color: isDark ? Colors.white54 : Colors.black54),
       ),
     );
   }
