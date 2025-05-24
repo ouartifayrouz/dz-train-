@@ -89,10 +89,14 @@ class UserInfoPage extends StatelessWidget {
 
   String getLocalizedGender(String? sexe, BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    switch (sexe?.toUpperCase()) {
-      case 'M':
+    if (sexe == null) return loc.unknown;
+
+    final cleanedSexe = sexe.trim().toLowerCase();
+
+    switch (cleanedSexe) {
+      case 'homme':
         return loc.male;
-      case 'F':
+      case 'femme':
         return loc.female;
       default:
         return loc.unknown;
