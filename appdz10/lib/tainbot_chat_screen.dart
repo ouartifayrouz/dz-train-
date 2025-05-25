@@ -3,8 +3,9 @@ import 'package:dialog_flowtter/dialog_flowtter.dart' as df;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // ✅ Import pour la localisation
 
-import 'AnimatedBackground.dart'; // ✅ Seulement le fond animé
+import 'AnimatedBackground.dart';
 
 class TrainbotChatScreen extends StatefulWidget {
   @override
@@ -87,7 +88,7 @@ class _TrainbotChatScreenState extends State<TrainbotChatScreen> {
         queryInput: df.QueryInput(text: df.TextInput(text: userMessage)),
       );
 
-      String botResponse = "Désolée, je n'ai pas compris.";
+      String botResponse = AppLocalizations.of(context)!.noMessagesYet;
       if (response.message != null &&
           response.message!.text != null &&
           response.message!.text!.text!.isNotEmpty) {
@@ -129,8 +130,10 @@ class _TrainbotChatScreenState extends State<TrainbotChatScreen> {
         var messages = snapshot.data!.docs;
         if (messages.isEmpty) {
           return Center(
-            child: Text("Aucun message pour l'instant",
-                style: TextStyle(fontSize: 16, color: Colors.grey)),
+            child: Text(
+                AppLocalizations.of(context)!.noMessagesYet,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           );
         }
 
@@ -159,16 +162,10 @@ class _TrainbotChatScreenState extends State<TrainbotChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("TrainBot"),
-        backgroundColor: Color(0x998BB1FF),
-      ),
+      
       body: Stack(
         children: [
-          // ✅ Fond animé uniquement
           Positioned.fill(child: AnimatedBackground()),
-
-          // 💬 Contenu du chat
           Column(
             children: [
               Expanded(child: _buildMessages()),
@@ -181,7 +178,7 @@ class _TrainbotChatScreenState extends State<TrainbotChatScreen> {
                         controller: _controller,
                         style: TextStyle(color: Colors.black),
                         decoration: InputDecoration(
-                          hintText: "Écrire un message...",
+                          hintText: AppLocalizations.of(context)!.writeMessage,
                           hintStyle: TextStyle(color: Colors.black54),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.85),
