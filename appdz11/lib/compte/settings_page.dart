@@ -39,6 +39,17 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     isDarkMode = widget.isDarkMode;
+    _loadNotificationPreference();
+  }
+
+  void _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getBool('notifications_enabled');
+    if (value != null) {
+      setState(() {
+        areNotificationsEnabled = value;
+      });
+    }
   }
 
   @override
@@ -82,11 +93,10 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 24),
             _buildSettingsSection(localizations.preferences, [
               _buildTile(Icons.language, localizations.changeLanguage,
-                  subtitle: widget.selectedLanguage.toUpperCase(), onTap: () {
+                  subtitle: Localizations.localeOf(context).languageCode.toUpperCase(),
+                  onTap: () {
                     _showLanguageDialog(context);
                   }),
-
-
               SwitchListTile(
                 secondary: Icon(Icons.notifications_active, color: Colors.black87),
                 title: Text(localizations.notifications, style: const TextStyle(fontWeight: FontWeight.w500)),

@@ -3,17 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   final String username;
 
   NotificationsScreen({required this.username});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  bool notificationsEnabled = true;
 
   final List<Color> gradientColors = [
     Color(0xFFF0F4F8),
     Color(0xFFD1D9E6),
     Color(0xFFA3BED8),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +71,7 @@ class NotificationsScreen extends StatelessWidget {
                 onPressed: () async {
                   final query = await FirebaseFirestore.instance
                       .collection('notifications')
-                      .doc(username)
+                      .doc(widget.username)
                       .collection('user_notifications')
                       .where('isRead', isEqualTo: false)
                       .get();
@@ -74,7 +95,8 @@ class NotificationsScreen extends StatelessWidget {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text(AppLocalizations.of(context)!.confirmDeletion),
-                      content: Text(AppLocalizations.of(context)!.deleteAllConfirm),
+                      content:
+                      Text(AppLocalizations.of(context)!.deleteAllConfirm),
                       actions: [
                         TextButton(
                           child: Text(AppLocalizations.of(context)!.cancel),
@@ -93,7 +115,7 @@ class NotificationsScreen extends StatelessWidget {
                   if (confirm == true) {
                     final query = await FirebaseFirestore.instance
                         .collection('notifications')
-                        .doc(username)
+                        .doc(widget.username)
                         .collection('user_notifications')
                         .get();
 
@@ -113,7 +135,14 @@ class NotificationsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
+      body: !notificationsEnabled
+          ? Center(
+        child: Text(
+          AppLocalizations.of(context)!.notificationsDisabled,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      )
+          : Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradientColors,
@@ -124,7 +153,7 @@ class NotificationsScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('notifications')
-              .doc(username)
+              .doc(widget.username)
               .collection('user_notifications')
               .orderBy('timestamp', descending: true)
               .snapshots(),
@@ -147,7 +176,8 @@ class NotificationsScreen extends StatelessWidget {
             return ListView.separated(
               padding: const EdgeInsets.all(12),
               itemCount: notifications.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
+              separatorBuilder: (context, index) =>
+              const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final notif = notifications[index];
                 final isRead = notif['isRead'] ?? false;
@@ -167,12 +197,13 @@ class NotificationsScreen extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     decoration: BoxDecoration(
-                      color: isRead ? Colors.white : const Color(0xFFEFF2FF),
+                      color:
+                      isRead ? Colors.white : const Color(0xFFEFF2FF),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
-                      contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       title: Text(
                         title,
                         style: const TextStyle(
@@ -207,27 +238,38 @@ class NotificationsScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (!isRead)
-                            const Icon(Icons.circle, color: Colors.red, size: 12),
+                            const Icon(Icons.circle,
+                                color: Colors.red, size: 12),
                           IconButton(
                             icon: Icon(Icons.delete,
                                 color: Colors.grey[600], size: 20),
-                            tooltip: AppLocalizations.of(context)!.delete,
+                            tooltip:
+                            AppLocalizations.of(context)!.delete,
                             onPressed: () async {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text(AppLocalizations.of(context)!.confirmDeletion),
-                                  content: Text(AppLocalizations.of(context)!.confirm_delete_one_message),
+                                  title: Text(AppLocalizations.of(context)!
+                                      .confirmDeletion),
+                                  content: Text(
+                                      AppLocalizations.of(context)!
+                                          .confirm_delete_one_message),
                                   actions: [
                                     TextButton(
-                                      child: Text(AppLocalizations.of(context)!.cancel),
-                                      onPressed: () => Navigator.of(ctx).pop(false),
+                                      child: Text(
+                                          AppLocalizations.of(context)!
+                                              .cancel),
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(false),
                                     ),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.red),
-                                      child: Text(AppLocalizations.of(context)!.delete),
-                                      onPressed: () => Navigator.of(ctx).pop(true),
+                                      child: Text(
+                                          AppLocalizations.of(context)!
+                                              .delete),
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(true),
                                     ),
                                   ],
                                 ),
@@ -235,9 +277,12 @@ class NotificationsScreen extends StatelessWidget {
 
                               if (confirm == true) {
                                 await notif.reference.delete();
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(
                                   SnackBar(
-                                    content: Text(AppLocalizations.of(context)!.deleted),
+                                    content: Text(
+                                        AppLocalizations.of(context)!
+                                            .deleted),
                                   ),
                                 );
                               }

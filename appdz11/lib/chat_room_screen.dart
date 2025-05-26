@@ -34,6 +34,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
   @override
   void dispose() {
     _animationController.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
@@ -102,7 +103,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    bool isLightMode = Theme.of(context).brightness == Brightness.light;
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -111,8 +112,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
           loc.chatTitle,
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Color(0x998BB1FF),
+        backgroundColor: const Color(0x998BB1FF),
         elevation: 5,
+        iconTheme: IconThemeData(color: Colors.black87),
       ),
       body: Column(
         children: [
@@ -125,7 +127,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
                 final validMessages = snapshot.data!.docs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
@@ -141,19 +143,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                   reverse: true,
                   itemCount: validMessages.length,
                   itemBuilder: (context, index) {
-                    var message = validMessages[index];
-                    bool isMe = message['sender'] == widget.username;
+                    final message = validMessages[index];
+                    final data = message.data() as Map<String, dynamic>;
+                    final isMe = data['sender'] == widget.username;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                       child: Column(
-                        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           if (!isMe)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
-                                message['sender'] ?? loc.unknownUser,
+                                data['sender'] ?? loc.unknownUser,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
@@ -166,35 +170,33 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                             child: Container(
                               constraints: BoxConstraints(
                                   maxWidth: MediaQuery.of(context).size.width * 0.7),
-                              padding: EdgeInsets.all(14),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: isMe ? Color(0x998BB1FF) : Color(0xFF8795A5),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(18),
-                                  topRight: Radius.circular(18),
-                                  bottomLeft: Radius.circular(isMe ? 18 : 0),
-                                  bottomRight: Radius.circular(isMe ? 0 : 18),
-                                ),
+                                color: isMe ? const Color(0x998BB1FF) : const Color(0xFF8795A5),
+                                borderRadius: BorderRadius.circular(18),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (message['isImage'])
-                                    Image.network(message['text'], width: 200),
-                                  if (!message['isImage'])
+                                  if (data['isImage'])
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(data['text'], width: 180),
+                                    ),
+                                  if (!data['isImage'])
                                     Text(
-                                      message['text'],
+                                      data['text'],
                                       style: TextStyle(
                                         color: isMe ? Colors.black87 : Colors.black87,
-                                        fontSize: 15,
+                                        fontSize: 14,
                                       ),
                                     ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Align(
                                     alignment: Alignment.bottomRight,
                                     child: Text(
-                                      _formatTimestamp(message['timestamp']),
-                                      style: TextStyle(
+                                      _formatTimestamp(data['timestamp']),
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         color: Colors.black54,
                                       ),
@@ -213,7 +215,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isLightMode ? Colors.white : Colors.grey.shade900,
               border: Border(top: BorderSide(color: Colors.grey.shade300)),
@@ -221,7 +223,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.image, color: Color(0xFD0B0000)),
+                  icon: const Icon(Icons.image, color: Color(0xFD0B0000)),
                   onPressed: _pickImage,
                 ),
                 Expanded(
@@ -236,17 +238,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                         color: isLightMode ? Colors.grey : Colors.grey[400],
                       ),
                       border: InputBorder.none,
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFD0B0000)),
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFD0B0000)),
+                  icon: const Icon(Icons.send, color: Color(0xFD0B0000)),
                   onPressed: _sendMessage,
                 ),
               ],
