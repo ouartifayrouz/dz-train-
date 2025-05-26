@@ -150,7 +150,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                                   maxWidth: MediaQuery.of(context).size.width * 0.7),
                               padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: isMe ? Color(0x998BB1FF) : Color(0xFFF4D9DE),
+                                color: isMe ? Color(0x998BB1FF) : Color(
+                                    0xFF8795A5),
                                 borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(18),
                                   topRight: Radius.circular(18),

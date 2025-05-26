@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dztrainfay/Admin/train_management_screen.dart';
 import 'AdminListScreen.dart';
@@ -9,10 +10,29 @@ import 'trajet_management_screen.dart';
 import 'statistics_page.dart';
 import 'package:dztrainfay/SignInScreen.dart';
 
-class AdminHomePage extends StatelessWidget {
+class AdminHomePage extends StatefulWidget {
   final String adminUsername;
 
-  const AdminHomePage({required this.adminUsername});
+  const AdminHomePage({Key? key, required this.adminUsername}) : super(key: key);
+
+  @override
+  State<AdminHomePage> createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
+  bool _showWelcomeBanner = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _showWelcomeBanner = false;
+        });
+      }
+    });
+  }
 
   void _navigateTo(BuildContext context, Widget screen) {
     Navigator.push(
@@ -26,7 +46,7 @@ class AdminHomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3B5998),
+        backgroundColor: const Color(0xFFD1D9E6),
         elevation: 4,
         title: const Text(
           'Espace Administrateur',
@@ -52,7 +72,7 @@ class AdminHomePage extends StatelessWidget {
                   const Icon(Icons.account_circle, color: Colors.white),
                   const SizedBox(width: 2),
                   Text(
-                    adminUsername,
+                    widget.adminUsername,
                     style: const TextStyle(color: Colors.white),
                   ),
                   const Icon(Icons.arrow_drop_down, color: Colors.white),
@@ -79,57 +99,63 @@ class AdminHomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3E6D6),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.waving_hand_rounded, color: Colors.orange, size: 32),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          const TextSpan(
-                            text: "Bienvenue ",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600,
+            AnimatedOpacity(
+              opacity: _showWelcomeBanner ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 500),
+              child: _showWelcomeBanner
+                  ? Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3E6D6),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.waving_hand_rounded, color: Colors.orange, size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: "Bienvenue ",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: adminUsername,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF111213),
+                            TextSpan(
+                              text: widget.adminUsername,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF111213),
+                              ),
                             ),
-                          ),
-                          const TextSpan(
-                            text: " \nHeureux de vous revoir dans votre tableau de bord.",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
+                            const TextSpan(
+                              text: " \nHeureux de vous revoir dans votre tableau de bord.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              )
+                  : const SizedBox.shrink(),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -183,7 +209,7 @@ class AdminHomePage extends StatelessWidget {
                   _buildMenuButton(
                     context: context,
                     label: "Voir les Statistiques",
-                    screen: StylishStatsScreen (),//StatistiquesScreen(),
+                    screen: StylishStatsScreen(),
                     icon: Icons.bar_chart,
                     color: const Color(0xFFB3A0F1),
                   ),
@@ -191,7 +217,7 @@ class AdminHomePage extends StatelessWidget {
                     context: context,
                     label: "Objets Perdus",
                     screen: AdminLostObjectsScreen(),
-                    icon: Icons.search, // ou Icons.backpack, Icons.inventory, selon le style voulu
+                    icon: Icons.search,
                     color: const Color(0xFFF4D9DE),
                   ),
                 ],
@@ -241,3 +267,4 @@ class AdminHomePage extends StatelessWidget {
     );
   }
 }
+

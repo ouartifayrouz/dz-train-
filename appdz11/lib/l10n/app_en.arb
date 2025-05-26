@@ -626,8 +626,10 @@
   "trajet_confirm_suppression": "Do you really want to delete this trip?",
   "common_yes": "Yes",
   "common_no": "No",
-  "invalidCredentials": "Invalid username or password."
-
+  "invalidCredentials": "Invalid username or password.",
+  "french": "French",
+  "english": "English",
+  "arabic": "Arabic"
 
 }
 

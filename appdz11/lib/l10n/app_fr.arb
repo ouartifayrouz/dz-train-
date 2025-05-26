@@ -687,6 +687,10 @@
         "type": "Object"
       }
     }
-  }
+  },
+     "french": "Français",
+     "english": "Anglais",
+     "arabic": "Arabe",
+     "chooseLanguage": "Choisir la langue"
 
 }

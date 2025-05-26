@@ -14,7 +14,8 @@ dependencies:
   firebase_messaging: ^15.2.6
   flutter:
     sdk: flutter
-
+  fl_chart: ^0.63.0  # ou la dernière version compatible
+  country_icons: ^2.0.1
   # UI & design
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.0.0

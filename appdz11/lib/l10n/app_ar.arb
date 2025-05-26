@@ -641,5 +641,10 @@
   "incorrectUsernameOrPassword": "اسم المستخدم أو كلمة المرور غير صحيحة",
   "loginError": "خطأ في تسجيل الدخول: {error}",
   "account_deleted_success": "تم حذف الحساب بنجاح",
-  "account_deletion_error": "حدث خطأ أثناء حذف الحساب"
+  "account_deletion_error": "حدث خطأ أثناء حذف الحساب",
+
+  "french": "العربية",
+      "english": "العربية",
+      "arabic": "العربية",
+      "chooseLanguage": "اختر اللغة"
 }
