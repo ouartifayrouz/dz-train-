@@ -92,6 +92,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
     });
   }
 
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return '';
+    final date = timestamp.toDate();
+    final hours = date.hour.toString().padLeft(2, '0');
+    final minutes = date.minute.toString().padLeft(2, '0');
+    return '$hours:$minutes';
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isLightMode = Theme.of(context).brightness == Brightness.light;
@@ -119,11 +127,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
+                final validMessages = snapshot.data!.docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final timestamp = data['timestamp'];
+                  if (timestamp is Timestamp) {
+                    final messageTime = timestamp.toDate();
+                    return messageTime.isAfter(DateTime.now().subtract(Duration(hours: 24)));
+                  }
+                  return false;
+                }).toList();
+
                 return ListView.builder(
                   reverse: true,
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: validMessages.length,
                   itemBuilder: (context, index) {
-                    var message = snapshot.data!.docs[index];
+                    var message = validMessages[index];
                     bool isMe = message['sender'] == widget.username;
 
                     return Padding(
@@ -150,8 +168,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                                   maxWidth: MediaQuery.of(context).size.width * 0.7),
                               padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: isMe ? Color(0x998BB1FF) : Color(
-                                    0xFF8795A5),
+                                color: isMe ? Color(0x998BB1FF) : Color(0xFF8795A5),
                                 borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(18),
                                   topRight: Radius.circular(18),
@@ -159,14 +176,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with SingleTickerProvid
                                   bottomRight: Radius.circular(isMe ? 0 : 18),
                                 ),
                               ),
-                              child: message['isImage']
-                                  ? Image.network(message['text'], width: 200)
-                                  : Text(
-                                message['text'],
-                                style: TextStyle(
-                                  color: isMe ? Colors.black87 : Colors.black87,
-                                  fontSize: 15,
-                                ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (message['isImage'])
+                                    Image.network(message['text'], width: 200),
+                                  if (!message['isImage'])
+                                    Text(
+                                      message['text'],
+                                      style: TextStyle(
+                                        color: isMe ? Colors.black87 : Colors.black87,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  SizedBox(height: 4),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Text(
+                                      _formatTimestamp(message['timestamp']),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),

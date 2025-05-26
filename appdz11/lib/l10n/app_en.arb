@@ -12,6 +12,8 @@
   "@account_deletion_failed": {
     "description": "Error message when account deletion fails"
   },
+  "notificationsDisabled": "Notifications are disabled.",
+
   "noMessages": "No messages",
   "errorMessage": "An error has occurred. Please try again.",
   "ok": "OK",

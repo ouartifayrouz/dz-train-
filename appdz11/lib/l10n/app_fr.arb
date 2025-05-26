@@ -9,6 +9,8 @@
   "@account_deletion_failed": {
     "description": "Message d'erreur quand la suppression de compte échoue"
   },
+  "notificationsDisabled": "Les notifications sont désactivées.",
+
   "errorMessage": "Une erreur est survenue. Veuillez réessayer.",
   "ok": "OK",
   "orSignInWith": "Ou connectez-vous avec",

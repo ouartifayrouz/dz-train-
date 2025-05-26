@@ -81,7 +81,8 @@ class NotificationsScreen extends StatelessWidget {
                           onPressed: () => Navigator.of(ctx).pop(false),
                         ),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red),
                           child: Text(AppLocalizations.of(context)!.deleteAll),
                           onPressed: () => Navigator.of(ctx).pop(true),
                         ),
@@ -208,15 +209,14 @@ class NotificationsScreen extends StatelessWidget {
                           if (!isRead)
                             const Icon(Icons.circle, color: Colors.red, size: 12),
                           IconButton(
-                            icon:
-                            Icon(Icons.delete, color: Colors.grey[600], size: 20),
+                            icon: Icon(Icons.delete,
+                                color: Colors.grey[600], size: 20),
                             tooltip: AppLocalizations.of(context)!.delete,
                             onPressed: () async {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  title:
-                                  Text(AppLocalizations.of(context)!.confirmDeletion),
+                                  title: Text(AppLocalizations.of(context)!.confirmDeletion),
                                   content: Text(AppLocalizations.of(context)!.confirm_delete_one_message),
                                   actions: [
                                     TextButton(
@@ -226,8 +226,7 @@ class NotificationsScreen extends StatelessWidget {
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.red),
-                                      child:
-                                      Text(AppLocalizations.of(context)!.delete),
+                                      child: Text(AppLocalizations.of(context)!.delete),
                                       onPressed: () => Navigator.of(ctx).pop(true),
                                     ),
                                   ],
@@ -238,8 +237,7 @@ class NotificationsScreen extends StatelessWidget {
                                 await notif.reference.delete();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content:
-                                    Text(AppLocalizations.of(context)!.deleted),
+                                    content: Text(AppLocalizations.of(context)!.deleted),
                                   ),
                                 );
                               }

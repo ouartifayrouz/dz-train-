@@ -9,6 +9,8 @@
   "@noMessages": {
     "description": "النص المعروض عندما لا توجد رسائل"
   },
+  "notificationsDisabled": "تم تعطيل الإشعارات.",
+
   "account_deletion_failed": "Account deletion failed",
   "@account_deletion_failed": {
     "description": "Error message when account deletion fails"

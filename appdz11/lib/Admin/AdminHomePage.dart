@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dztrainfay/Admin/train_management_screen.dart';
 import 'AdminListScreen.dart';
@@ -8,31 +7,13 @@ import 'LigneListScreen.dart';
 import 'UserListScreen.dart';
 import 'trajet_management_screen.dart';
 import 'statistics_page.dart';
+import 'admin_messages_screen.dart'; // <-- Ajout de cette ligne
 import 'package:dztrainfay/SignInScreen.dart';
 
-class AdminHomePage extends StatefulWidget {
+class AdminHomePage extends StatelessWidget {
   final String adminUsername;
 
-  const AdminHomePage({Key? key, required this.adminUsername}) : super(key: key);
-
-  @override
-  State<AdminHomePage> createState() => _AdminHomePageState();
-}
-
-class _AdminHomePageState extends State<AdminHomePage> {
-  bool _showWelcomeBanner = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() {
-          _showWelcomeBanner = false;
-        });
-      }
-    });
-  }
+  const AdminHomePage({required this.adminUsername});
 
   void _navigateTo(BuildContext context, Widget screen) {
     Navigator.push(
@@ -46,7 +27,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD1D9E6),
+        backgroundColor: const Color(0xFF3B5998),
         elevation: 4,
         title: const Text(
           'Espace Administrateur',
@@ -72,7 +53,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   const Icon(Icons.account_circle, color: Colors.white),
                   const SizedBox(width: 2),
                   Text(
-                    widget.adminUsername,
+                    adminUsername,
                     style: const TextStyle(color: Colors.white),
                   ),
                   const Icon(Icons.arrow_drop_down, color: Colors.white),
@@ -99,63 +80,57 @@ class _AdminHomePageState extends State<AdminHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedOpacity(
-              opacity: _showWelcomeBanner ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: _showWelcomeBanner
-                  ? Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3E6D6),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.waving_hand_rounded, color: Colors.orange, size: 32),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: "Bienvenue ",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w600,
-                              ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3E6D6),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.waving_hand_rounded, color: Colors.orange, size: 32),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: "Bienvenue ",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
                             ),
-                            TextSpan(
-                              text: widget.adminUsername,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF111213),
-                              ),
+                          ),
+                          TextSpan(
+                            text: adminUsername,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF111213),
                             ),
-                            const TextSpan(
-                              text: " \nHeureux de vous revoir dans votre tableau de bord.",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
+                          ),
+                          const TextSpan(
+                            text: " \nHeureux de vous revoir dans votre tableau de bord.",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              )
-                  : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -220,6 +195,14 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     icon: Icons.search,
                     color: const Color(0xFFF4D9DE),
                   ),
+                  // ✅ Nouveau bouton pour les messages
+                  _buildMenuButton(
+                    context: context,
+                    label: "Messages Utilisateurs",
+                    screen: AdminMessagesScreen(),
+                    icon: Icons.message,
+                    color: const Color(0xFFD8B4FE),
+                  ),
                 ],
               ),
             ),
@@ -267,4 +250,3 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 }
-

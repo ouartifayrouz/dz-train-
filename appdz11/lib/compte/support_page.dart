@@ -62,8 +62,10 @@ class _SupportPageState extends State<SupportPage> {
                 children: [
                   TextFormField(
                     controller: _emailController,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       labelText: loc.emailLabel,
+                      labelStyle: const TextStyle(color: Colors.black54),
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) =>
@@ -73,8 +75,10 @@ class _SupportPageState extends State<SupportPage> {
                   TextFormField(
                     controller: _messageController,
                     maxLines: 4,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       labelText: loc.messageLabel,
+                      labelStyle: const TextStyle(color: Colors.black54),
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) =>
@@ -144,17 +148,31 @@ class _SupportPageState extends State<SupportPage> {
     );
   }
 
-  void _envoyerMessage() {
+  /// ✅ Envoie du message à Firebase
+  void _envoyerMessage() async {
     final loc = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
+      await FirebaseFirestore.instance.collection('support_messages').add({
+        'email': _emailController.text.trim(),
+        'message': _messageController.text.trim(),
+        'timestamp': Timestamp.now(),
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.messageSent), backgroundColor: Colors.green),
       );
+
       _emailController.clear();
       _messageController.clear();
+
+      setState(() {
+        showRatingBar = false;
+      });
     }
   }
 
+  /// ✅ Envoie de la note à Firebase
   void _envoyerNote() async {
     final loc = AppLocalizations.of(context)!;
     try {

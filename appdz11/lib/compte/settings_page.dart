@@ -92,9 +92,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text(localizations.notifications, style: const TextStyle(fontWeight: FontWeight.w500)),
                 value: areNotificationsEnabled,
                 activeColor: primaryColor,
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() => areNotificationsEnabled = value);
                   widget.toggleNotifications(value);
+
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('notifications_enabled', value);
                 },
               ),
             ]),
