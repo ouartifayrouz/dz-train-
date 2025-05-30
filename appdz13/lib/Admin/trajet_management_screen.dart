@@ -109,11 +109,13 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
 
     final heureDepCtrl = TextEditingController(text: trajet['Heure_de_Départ']);
     final heureArrCtrl = TextEditingController(text: trajet["Heure_d'Arrivée"]);
-    final trainIdCtrl = TextEditingController(text: trajet['trainId'] ?? '');
+    String? selectedTrainId = trajet['trainId'];
     final jourCtrl = TextEditingController(text: trajet['Jour_de_Circulation'] ?? '');
 
     final gareSnapshot = await FirebaseFirestore.instance.collection('Gare').get();
     final ligneSnapshot = await FirebaseFirestore.instance.collection('LIGNE').get();
+    final trainSnapshot = await FirebaseFirestore.instance.collection('TRAIN').get();
+    final trains = trainSnapshot.docs.map((doc) => doc.id.toString()).toList();
 
     final gares = gareSnapshot.docs.map((doc) => doc['name'].toString()).toList();
     final lignes = ligneSnapshot.docs.map((doc) => doc['nom'].toString()).toList();
@@ -173,6 +175,14 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
                           options: lignes,
                           onChanged: (val) => setOverlayState(() => selectedLigne = val),
                         ),
+                        _customDropdownField(
+                          context: context,
+                          label: "Train",
+                          value: selectedTrainId,
+                          options: trains,
+                          onChanged: (val) => setOverlayState(() => selectedTrainId = val),
+                        ),
+
                         SizedBox(height: 12),
 
                         _buildTextField("Heure de Départ", heureDepCtrl),
@@ -187,8 +197,7 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
 
                         SizedBox(height: 12),
 
-                        _buildTextField("Train ID", trainIdCtrl),
-                        SizedBox(height: 20),
+
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -210,7 +219,7 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
                                   "Heure_d'Arrivée": heureArrCtrl.text,
                                   'Jour_de_Circulation': jourCtrl.text,
                                   'lineId': selectedLigne,
-                                  'trainId': trainIdCtrl.text,
+                                  'trainId': selectedTrainId,
                                 });
                                 overlayEntry?.remove();
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -728,7 +737,7 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
     String? selectedAret;
     String? selectedLigne;
     String? selectedJour;
-    final TextEditingController trainIdController = TextEditingController();
+    String? selectedTrainId;
 
     Widget _buildStyledSelector({
       required String label,
@@ -819,12 +828,15 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
       future: Future.wait([
         FirebaseFirestore.instance.collection('Gare').get(),
         FirebaseFirestore.instance.collection('LIGNE').get(),
+        FirebaseFirestore.instance.collection('TRAIN').get(), // <-- AJOUTÉ ICI
       ]),
+
       builder: (context, AsyncSnapshot<List<QuerySnapshot>> snapshot) {
         if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
         final gares = snapshot.data![0].docs.map((doc) => doc['name'].toString()).toList();
         final lignes = snapshot.data![1].docs.map((doc) => doc['nom'].toString()).toList();
+        final trains = snapshot.data![2].docs.map((doc) => doc.id.toString()).toList();
 
         return StatefulBuilder(
           builder: (context, setFormState) {
@@ -847,7 +859,14 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
 
                   _buildStyledTextField("Heure de Départ", heureDepartController),
                   _buildStyledTextField("Heure de passage Arrivée ", heureArriveeController),
-                  _buildStyledTextField("ID du train", trainIdController),
+                  // _buildStyledTextField("ID du train", trainIdController),
+
+                  _buildStyledSelector(
+                    label: "ID du Train",
+                    selectedValue: selectedTrainId,
+                    options: trains,
+                    onSelected: (val) => setFormState(() => selectedTrainId = val),
+                  ),
 
                   _buildStyledSelector(
                     label: "Ligne",
@@ -914,7 +933,9 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
                           selectedAret == null ||
                           selectedLigne == null ||
                           selectedJour == null ||
-                          trainIdController.text.isEmpty ||
+                          //trainIdController.text.isEmpty ||
+                          selectedTrainId == null  ||// ✅
+
                           heureDepartController.text.isEmpty ||
                           heureArriveeController.text.isEmpty ||
                           garesIntermediaires.isEmpty) {
@@ -930,7 +951,7 @@ class _AdminTrajetsPageState extends State<AdminTrajetsPage> {
                         'Heure_de_Départ': heureDepartController.text,
                         "Heure_d'Arrivée": heureArriveeController.text,
                         'Jour_de_Circulation': selectedJour,
-                        'trainId': trainIdController.text,
+                        'trainId': selectedTrainId,
                         'lineId': selectedLigne,
                       });
 

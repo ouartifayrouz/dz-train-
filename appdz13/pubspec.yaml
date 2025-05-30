@@ -10,6 +10,7 @@ environment:
 dependencies:
   wave: ^0.2.0
   badges: ^3.1.1
+  audioplayers: ^5.2.1
   timeago: ^3.6.0
   firebase_messaging: ^15.2.6
   flutter:
@@ -99,7 +100,7 @@ flutter:
     - assets/fonts/Montserrat/static/Montserrat-Bold.ttf
     - assets/images/train_on_map.png
     - assets/images/train_icon.png
-
+    - assets/sounds/blood_splash.mp3
 
   fonts:
     - family: Montserrat

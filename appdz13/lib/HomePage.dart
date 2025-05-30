@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dztrainfay/home_screen.dart';
 import 'package:dztrainfay/chat_screen.dart';
 import 'package:dztrainfay/compte/compte_screen.dart';
+import 'package:dztrainfay/services/notification_listener_service.dart'; // <-- ajoute ce chemin correctement
 import 'CustomBottomNavBar.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,21 +15,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+
+    // Lance l'écoute des notifications dès que HomePage est construite
+    NotificationListenerService().startListening(widget.username);
+
     _pages = [
-      HomeScreen(), // Accueil
+      HomeScreen(),
       ProfilePage(
         username: widget.username,
         toggleTheme: (_) {},
         changeLanguage: (_) {},
         toggleNotifications: (_) {},
-      ), // Compte
-      ChatScreen(), // Chat
+      ),
+      ChatScreen(),
     ];
   }
 

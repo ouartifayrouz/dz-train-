@@ -9,28 +9,7 @@ class LostObjectDetailsScreen extends StatelessWidget {
 
   LostObjectDetailsScreen({required this.objectId});
 
-  Future<void> sendPushNotification(String token, String title, String body) async {
-    try {
-      await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'key=VOTRE_CLE_FCM_SERVEUR', // Remplace avec ta vraie clé
-        },
-        body: jsonEncode({
-          'to': token,
-          'notification': {
-            'title': title,
-            'body': body,
-            'sound': 'default',
-          },
-          'priority': 'high',
-        }),
-      );
-    } catch (e) {
-      print('Erreur en envoyant la notification : $e');
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +59,6 @@ class LostObjectDetailsScreen extends StatelessWidget {
                 .doc(usernameProprietaire)
                 .get();
 
-            final userToken = userDoc.data()?['fcmToken'];
-            if (userToken != null) {
-              await sendPushNotification(
-                userToken,
-                localizations.lostObjectStatusUpdateTitle,
-                '${localizations.lostObjectStatusUpdateBody} $newStatus.',
-              );
-            }
           }
 
           return Padding(

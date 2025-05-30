@@ -60,136 +60,208 @@ class _TrainManagementScreenState extends State<TrainManagementScreen> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          train == null ? 'Ajouter un Train' : 'Modifier le Train',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: numController,
-                style: TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  labelText: 'Numéro du train',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.train, color: Colors.black),
-                  border: OutlineInputBorder(),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                train == null ? 'Ajouter un Train' : 'Modifier le Train',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-              SizedBox(height: 12),
-              TextField(
-                controller: lineController,
-                style: TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  labelText: 'ID de la ligne',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.line_weight, color: Colors.black),
-                  border: OutlineInputBorder(),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: numController,
+                      style: TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        labelText: 'Numéro du train',
+                        labelStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.train, color: Colors.black),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: lineController,
+                      style: TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        labelText: 'ID de la ligne',
+                        labelStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.line_weight, color: Colors.black),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      style: TextStyle(color: Colors.black),
+                      dropdownColor: Colors.white,
+                      items: statusOptions.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status, style: TextStyle(color: Colors.black)),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setStateDialog(() {
+                            selectedStatus = value;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Statut',
+                        labelStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.info, color: Colors.black),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: latController,
+                      style: TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        labelText: 'Latitude',
+                        labelStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.my_location, color: Colors.black),
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: lngController,
+                      style: TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        labelText: 'Longitude',
+                        labelStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.location_on, color: Colors.black),
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: selectedStatus,
-                style: TextStyle(color: Colors.black),
-                dropdownColor: Colors.white,
-                items: statusOptions.map((status) {
-                  return DropdownMenuItem(
-                    value: status,
-                    child: Text(status, style: TextStyle(color: Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedStatus = value;
-                    });
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Statut',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.info, color: Colors.black),
-                  border: OutlineInputBorder(),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Annuler'),
                 ),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: latController,
-                style: TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  labelText: 'Latitude',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.my_location, color: Colors.black),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: lngController,
-                style: TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  labelText: 'Longitude',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.location_on, color: Colors.black),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
-          ),
-          ElevatedButton.icon(
-            icon: Icon(train == null ? Icons.add : Icons.edit),
-            label: Text(train == null ? 'Ajouter' : 'Modifier'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFE8AAB4),
-            ),
-            onPressed: () async {
-              if (numController.text.isEmpty ||
-                  lineController.text.isEmpty ||
-                  latController.text.isEmpty ||
-                  lngController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Veuillez remplir tous les champs')),
-                );
-                return;
-              }
+                ElevatedButton.icon(
+                  icon: Icon(train == null ? Icons.add : Icons.edit),
+                  label: Text(train == null ? 'Ajouter' : 'Modifier'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE8AAB4),
+                  ),
+                  onPressed: () async {
+                    if (numController.text.isEmpty ||
+                        lineController.text.isEmpty ||
+                        latController.text.isEmpty ||
+                        lngController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Veuillez remplir tous les champs')),
+                      );
+                      return;
+                    }
 
-              final data = {
-                'numtrain': numController.text.trim(),
-                'lineId': lineController.text.trim(),
-                'status': selectedStatus,
-                'lastUpdated': FieldValue.serverTimestamp(),
-                'position': {
-                  'lat': double.tryParse(latController.text) ?? 0.0,
-                  'lng': double.tryParse(lngController.text) ?? 0.0,
-                }
-              };
+                    final data = {
+                      'numtrain': numController.text.trim(),
+                      'lineId': lineController.text.trim(),
+                      'status': selectedStatus,
+                      'lastUpdated': FieldValue.serverTimestamp(),
+                      'position': {
+                        'lat': double.tryParse(latController.text) ?? 0.0,
+                        'lng': double.tryParse(lngController.text) ?? 0.0,
+                      }
+                    };
 
-              if (train == null) {
-                await trainRef.add(data);
-              } else {
-                await trainRef.doc(train.id).update(data);
-              }
+                    try {
+                      if (train == null) {
+                        // Ajout nouveau train
+                        await trainRef.doc(numController.text.trim()).set(data);
+                      } else {
+                        // Mise à jour train existant
+                        await trainRef.doc(train.id).update(data);
 
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
+                        // Vérifier si le train est dans les trajets favoris
+                        final historiqueSnapshot = await FirebaseFirestore.instance
+                            .collection('historique_trajets')
+                            .where('trainId', isEqualTo: train['numtrain']) // adapter selon ta structure
+                            .get();
+
+
+
+                        for (var doc in historiqueSnapshot.docs) {
+                          final username = doc['username'];
+                          final depart = doc['gareDepart'] ?? 'inconnu';
+                          final arrivee = doc['gareArrivee'] ?? 'inconnu';
+                          final heureDepart = doc['heureDepart'] ?? 'inconnue';
+                          final trainNum = data['numtrain'] ?? '---';
+                          final status = data['status'] ?? '---';
+
+                          String bodyMessage = '';
+                          String title = '';
+
+                          if (status == 'en_service') {
+                            title = ' $trainNum - En service';
+                            bodyMessage =
+                            '🚆 Le  $trainNum  fonctionne maintenant.';
+                          } else if (['en_panne', 'hors_service', 'maintenance'].contains(status)) {
+                            String readableStatus = '';
+
+                            switch (status) {
+                              case 'en_panne':
+                                readableStatus = 'en panne';
+                                break;
+                              case 'hors_service':
+                                readableStatus = 'hors service';
+                                break;
+                              case 'maintenance':
+                                readableStatus = 'en maintenance';
+                                break;
+                            }
+
+                            title = '$trainNum - $readableStatus';
+                            bodyMessage =
+                            '🚫  Le trajet $depart - $arrivee prévu à $heureDepart n\'est pas disponible.';
+                          }
+
+                          if (bodyMessage.isNotEmpty) {
+                            await FirebaseFirestore.instance
+                                .collection('notifications')
+                                .doc(username)
+                                .collection('user_notifications')
+                                .add({
+                              'title': title,
+                              'body': bodyMessage,
+                              'timestamp': FieldValue.serverTimestamp(),
+                              'isRead': false,
+                            });
+                          }
+                        }
+
+                      }
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: $e')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -203,9 +275,15 @@ class _TrainManagementScreenState extends State<TrainManagementScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: trainRef.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-          final trains = snapshot.data!.docs;
+          if (snapshot.hasError) {
+            return Center(child: Text('Erreur de chargement'));
+          }
+
+          final trains = snapshot.data?.docs ?? [];
 
           if (trains.isEmpty) {
             return Center(child: Text("Aucun train trouvé."));
@@ -251,7 +329,13 @@ class _TrainManagementScreenState extends State<TrainManagementScreen> {
                           );
 
                           if (confirm == true) {
-                            await trainRef.doc(train.id).delete();
+                            try {
+                              await trainRef.doc(train.id).delete();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erreur lors de la suppression: $e')),
+                              );
+                            }
                           }
                         },
                       ),

@@ -12,38 +12,60 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
   final Color rowColor2 = const Color(0xFFDDD7E8FF);
   final Color resetButtonColor = const Color(0xFFF8D2D0);
   final Color applyButtonColor = const Color(0x998BB1FF);
+  Map<String, String> trainStatusMap = {};
 
   TextEditingController _searchController = TextEditingController();
   String _searchFilter = '';
 
-  // Variables pour tri et ordre
   String _tri = 'Aucun';
   bool _ordreCroissant = true;
 
-  // Variables pour filtre horaire
   TimeOfDay? _heureMin;
   TimeOfDay? _heureMax;
 
-  // Variables pour les couleurs des boutons sélectionnés
   bool isOrderSelected = false;
   bool isTriSelected = false;
   bool isTimeRangeSelected = false;
+
+  Color getStatusColor(String statut) {
+    switch (statut) {
+      case 'en_service':
+        return Colors.green;
+      case 'en_retard':
+        return Colors.orange;
+      case 'en_panne':
+        return Colors.black;
+      default:
+        return Colors.grey;
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    _loadTrainStatuses();
+  }
+  Future<void> _loadTrainStatuses() async {
+    final snapshot = await FirebaseFirestore.instance.collection('TRAIN').get();
+    setState(() {
+      trainStatusMap = {
+        for (var doc in snapshot.docs)
+          doc.id: doc['status'] ?? 'inconnu',
+      };
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Tableau des trajets",
-          style: TextStyle(color: Colors.black87), // Définit le texte en noir
-        ),
+        title: Text("Tableau des trajets", style: TextStyle(color: Colors.black87)),
         backgroundColor: primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Ligne recherche et tri
+            // Barre de recherche + bouton filtre
             Row(
               children: [
                 Expanded(
@@ -78,14 +100,12 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
 
             SizedBox(height: 10),
 
-            // Affichage des trajets
+            // Tableau des trajets
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection('TRAJET1').snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+                  if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
                   final trajets = snapshot.data!.docs;
 
@@ -95,36 +115,25 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
                   final int? minMinutes = _heureMin != null ? _timeOfDayToMinutes(_heureMin) : null;
                   final int? maxMinutes = _heureMax != null ? _timeOfDayToMinutes(_heureMax) : null;
 
-                  // Filtrage par heure
                   final filtered = trajets.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
                     final heureDepartStr = data["Heure_de_Départ"] ?? '';
-
                     final heureDepartMinutes = _parseTimeToMinutes(heureDepartStr);
                     if (heureDepartMinutes == null) return false;
-
                     if (minMinutes != null && heureDepartMinutes < minMinutes) return false;
                     if (maxMinutes != null && heureDepartMinutes > maxMinutes) return false;
 
-                    // Autres filtres (recherche)
                     final all = data.values.map((e) => e.toString().toLowerCase()).join(' ');
                     return all.contains(_searchFilter);
                   }).toList();
 
-                  // Tri par heure
                   if (_tri == 'Heure') {
                     filtered.sort((a, b) {
                       final dataA = a.data() as Map<String, dynamic>;
                       final dataB = b.data() as Map<String, dynamic>;
-
-                      final ha = dataA["Heure_de_Départ"] ?? '';
-                      final hb = dataB["Heure_de_Départ"] ?? '';
-
-                      final haMin = _parseTimeToMinutes(ha);
-                      final hbMin = _parseTimeToMinutes(hb);
-
+                      final haMin = _parseTimeToMinutes(dataA["Heure_de_Départ"] ?? '');
+                      final hbMin = _parseTimeToMinutes(dataB["Heure_de_Départ"] ?? '');
                       if (haMin == null || hbMin == null) return 0;
-
                       return _ordreCroissant ? haMin.compareTo(hbMin) : hbMin.compareTo(haMin);
                     });
                   } else if (_tri == 'Ligne') {
@@ -141,28 +150,41 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
                       headingRowColor: MaterialStateProperty.all(primaryColor),
                       headingTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
                       columns: const [
-                        DataColumn(label: Text('ID')),
-                        DataColumn(label: Text('Départ')),
-                        DataColumn(label: Text('Arrêt')),
-                        DataColumn(label: Text("Heure d'Arrivée")),
-                        DataColumn(label: Text("Heure de Départ")),
+                        DataColumn(label: Text('Départ (Heure)')),
+                        DataColumn(label: Text("Arrêt (Heure)")),
                         DataColumn(label: Text('Train')),
                         DataColumn(label: Text('Ligne')),
                         DataColumn(label: Text('Jour de Circulation')),
+                        DataColumn(label: Text('Statut')),
                       ],
                       rows: List.generate(filtered.length, (index) {
                         final trajet = filtered[index].data() as Map<String, dynamic>;
+                        final trainId = trajet['trainId'] ?? '';
+                        final statut = trainStatusMap[trainId] ?? 'inconnu';
                         return DataRow(
-                          color: MaterialStateColor.resolveWith((states) => index.isEven ? rowColor1 : rowColor2),
+                          color: MaterialStateColor.resolveWith(
+                                (states) => statut == 'en_panne'
+                                ? Colors.red.withOpacity(0.8)
+                                : (index.isEven ? rowColor1 : rowColor2),
+                          ),
                           cells: [
-                            DataCell(Text('${trajet['ID'] ?? ''}')),
-                            DataCell(Text('${trajet['Depart'] ?? ''}')),
-                            DataCell(Text('${trajet['Aret'] ?? ''}')),
-                            DataCell(Text('${trajet["Heure_d\'Arrivée"] ?? ''}')),
-                            DataCell(Text('${trajet["Heure_de_Départ"] ?? ''}')),
+                            DataCell(Text(
+                              '${trajet['Depart'] ?? ''} (${trajet["Heure_de_Départ"] ?? ''})',
+                            )),
+                            DataCell(Text(
+                              '${trajet['Aret'] ?? ''} (${trajet["Heure_d\'Arrivée"] ?? ''})',
+                            )),
+
                             DataCell(Text('${trajet['trainId'] ?? ''}')),
                             DataCell(Text('${trajet['lineId'] ?? ''}')),
                             DataCell(Text('${trajet['Jour_de_Circulation'] ?? ''}')),
+                            DataCell(Text(
+                              statut,
+                              style: TextStyle(
+                                color: getStatusColor(statut),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )),
                           ],
                         );
                       }),
@@ -177,7 +199,6 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
     );
   }
 
-  // Fonction pour afficher le modal de filtrage
   Future<void> _showFilterModal(BuildContext context) async {
     showModalBottomSheet(
       context: context,
@@ -187,8 +208,7 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Ordre de tri
-              Text("Ordre de Tri", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey[800])),
+              Text("Ordre de Tri", style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   ElevatedButton(
@@ -196,13 +216,11 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
                       setState(() {
                         isOrderSelected = true;
                         isTriSelected = false;
-                        isTimeRangeSelected = false;
                         _ordreCroissant = true;
                       });
                     },
                     child: Text("Croissant"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(isOrderSelected ? rowColor2 : rowColor1)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(rowColor2)),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton(
@@ -210,76 +228,61 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
                       setState(() {
                         isOrderSelected = true;
                         isTriSelected = false;
-                        isTimeRangeSelected = false;
                         _ordreCroissant = false;
                       });
                     },
                     child: Text("Décroissant"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(isOrderSelected ? rowColor2 : rowColor1)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(rowColor2)),
                   ),
                 ],
               ),
               SizedBox(height: 20),
-
-              // Tri
-              Text("Tri", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey[800])),
+              Text("Tri", style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
                         isTriSelected = true;
-                        isOrderSelected = false;
-                        isTimeRangeSelected = false;
                         _tri = 'Aucun';
                       });
                     },
                     child: Text("Aucun"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(isTriSelected ? rowColor2 : rowColor1)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(rowColor2)),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
                         isTriSelected = true;
-                        isOrderSelected = false;
-                        isTimeRangeSelected = false;
                         _tri = 'Heure';
                       });
                     },
                     child: Text("Heure"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(isTriSelected ? rowColor2 : rowColor1)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(rowColor2)),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
                         isTriSelected = true;
-                        isOrderSelected = false;
-                        isTimeRangeSelected = false;
                         _tri = 'Ligne';
                       });
                     },
                     child: Text("Ligne"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(isTriSelected ? rowColor2 : rowColor1)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(rowColor2)),
                   ),
                 ],
               ),
               SizedBox(height: 20),
-
-              // Plage horaire
-              Text("Plage Horaire", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey[800])),
+              Text("Plage Horaire", style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
-                  Text("Heure Départ Min : "),
+                  Text("Min : "),
                   TextButton(
                     onPressed: () => _selectTime(context, true),
                     child: Text(
-                      _heureMin != null ? _heureMin!.format(context) : "Sélectionner",
+                      _heureMin?.format(context) ?? "Sélectionner",
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
@@ -287,25 +290,21 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
               ),
               Row(
                 children: [
-                  Text("Heure Départ Max : "),
+                  Text("Max : "),
                   TextButton(
                     onPressed: () => _selectTime(context, false),
                     child: Text(
-                      _heureMax != null ? _heureMax!.format(context) : "Sélectionner",
+                      _heureMax?.format(context) ?? "Sélectionner",
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
-
-              // Boutons de réinitialisation et appliquer les filtres
               Row(
                 children: [
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        // Réinitialiser les filtres
                         _searchFilter = '';
                         _tri = 'Aucun';
                         _ordreCroissant = true;
@@ -314,20 +313,16 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
                       });
                     },
                     child: Text("Réinitialiser"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(resetButtonColor)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(resetButtonColor)),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      setState(() {
-                        // Appliquer les filtres
-                      });
+                      setState(() {});
                     },
                     child: Text("Appliquer les filtres"),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(applyButtonColor)),
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(applyButtonColor)),
                   ),
                 ],
               ),
@@ -338,12 +333,8 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
     );
   }
 
-  // Fonction pour ouvrir le sélecteur d'heure
   Future<void> _selectTime(BuildContext context, bool isMin) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) {
       setState(() {
         if (isMin) {
@@ -355,7 +346,6 @@ class _HoraireTrainPageState extends State<HoraireTrainPage> {
     }
   }
 
-  // Convertir l'heure en minutes
   int? _parseTimeToMinutes(String heure) {
     final parts = heure.split(':');
     if (parts.length == 2) {
